@@ -7,7 +7,9 @@ import mhha.sample.httpssocket.databinding.ActivityMainBinding
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintWriter
-import java.net.ServerSocket
+import java.net.HttpURLConnection
+import java.net.Socket
+import java.net.URL
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
@@ -16,41 +18,37 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        //172.30.1.61
+
         Thread{
-            //172.30.1.63
-            val port = 8080
-            val server = ServerSocket(port)
-            val socket = server.accept()
+            try {
+                val socket = Socket("172.30.1.61", 8080)
+                val printer = PrintWriter(socket.getOutputStream())
+                val reader = BufferedReader(InputStreamReader(socket.getInputStream()))
 
-//        socket.getInputStream() // 클라이언트로부터 들어오는 스트림 == 클라이언트의 socket.outputStream
-//        socket.getOutputStream() // 클라이언트에게 데이터를 주는 스트림 == 클라인어트의 socket.inputStream
+                printer.println("GET / HTTP/1.1")
+                printer.println("Host: 172.30.1.61:5500")
+                printer.println("User-Agent: android")
+                printer.println("\r\n")
+                printer.flush()
 
-            val reader = BufferedReader(InputStreamReader(socket.getInputStream()))
-            val printer = PrintWriter(socket.getOutputStream())
 
-            var inputData: String? = "-1"  // 임의로 -1 값 줌
-
-            while (inputData != null && inputData != "") {
-                inputData = reader.readLine()  // 한줄 씩 읽기(엔터 입력 기준)
+                var input: String? = "-1"
+                while(input != null){
+                    input = reader.readLine()
+                    Log.e("httpssocketApp", input)
+                }
+                reader.close()
+                printer.close()
+                socket.close()
+            }catch (e : Exception){
+                Log.d("AppDebug", "$e")
             }
-
-            Log.e("Server", "Read Data $inputData")
-
-            printer.println("HTTP/1.1 200 OK") //정상 수신
-            printer.println("Content-Type: text/html\r\n") // header 부분
-
-            printer.println("<h1>Hello World!!</h1>")
-            printer.println("\r\n")
-            printer.flush() //잔여 데이터 제거
-            printer.close() // outputsteam 종료
-
-            reader.close() // inputstream 종료
-
-            socket.close() // 마지막으로 소켓 종료
-
         }.start()
 
+
     } //override fun onCreate(savedInstanceState: Bundle?)
+
 
 
 } //class MainActivity : AppCompatActivity()
