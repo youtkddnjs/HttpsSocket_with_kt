@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
+import com.google.gson.Gson
 import mhha.sample.httpssocket.databinding.ActivityMainBinding
 import okhttp3.Call
 import okhttp3.Callback
@@ -60,11 +61,14 @@ class MainActivity : AppCompatActivity() {
 
                     if(response.isSuccessful){
                         val resopnse = response.body?.string()
-                        Log.e("httpssocketApp", "${resopnse}")
+
+                        val messageClass = Gson().fromJson(resopnse, Message::class.java)
+
+//                        Log.e("httpssocketApp", "${messageClass.a}")
                         runOnUiThread {
 
                             binding.informationTextView.isVisible = true
-                            binding.informationTextView.text = resopnse
+                            binding.informationTextView.text = messageClass.a
 
                             binding.serverHostEditText.visibility = View.GONE
                             binding.confirmButton.visibility = View.GONE
